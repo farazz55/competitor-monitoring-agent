@@ -1,0 +1,1209 @@
+{
+  "name": "AI-Powered Competitor Monitoring Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "frequencyPenalty": 0,
+          "maxTokens": 500,
+          "responseFormat": "json_object",
+          "presencePenalty": 0,
+          "temperature": 0.2,
+          "timeout": 30000,
+          "maxRetries": 1,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        944,
+        -1344
+      ],
+      "id": "d7e140aa-edaf-4674-90a7-077dea82d9b7",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "RPP2tUkTKMslRE9n",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {
+          "maxTokens": 500,
+          "responseFormat": "json_object",
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        512,
+        -592
+      ],
+      "id": "c5b92b19-ab68-4918-989b-bba3675612f1",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "RPP2tUkTKMslRE9n",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 480,
+        "width": 1520,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -1696
+      ],
+      "id": "a52e1aba-61e8-44c3-9d24-04b1458aa579",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Monitoring (Competitor Signals Monitoring)\n\n",
+        "height": 672,
+        "width": 1520,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -1136
+      ],
+      "id": "297607ca-6502-4c3e-ae3c-bc55eb425787",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "formTitle": "AI Competitor Spy — Onboarding",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Company Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Industry",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Location",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Website"
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        -1568
+      ],
+      "id": "7ce5e5b2-9389-4db9-8072-44bc585a9856",
+      "name": "Capture Company Input",
+      "webhookId": "143888d0-b638-49cf-8c75-d697702d2d11"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "391578c7-d0f4-415e-a81b-48b6200bb349",
+              "name": "=name",
+              "value": "={{ $json['Company Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "1666773b-416a-41a9-9378-7232f21e562d",
+              "name": "industry",
+              "value": "={{ $json.Industry }}",
+              "type": "string"
+            },
+            {
+              "id": "abf6b796-04f2-481f-9166-c3de56eea2b9",
+              "name": "location",
+              "value": "={{ $json.Location }}",
+              "type": "string"
+            },
+            {
+              "id": "0e24549d-854c-4d34-a993-35f129ba301d",
+              "name": "website",
+              "value": "={{ $json.Website }}",
+              "type": "string"
+            },
+            {
+              "id": "48da5824-6eaa-4473-8263-d28e3dfb4b4b",
+              "name": "email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        -1568
+      ],
+      "id": "5ab35103-11b5-486a-a7cf-6aff83f029ed",
+      "name": "Normalize Input"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Company input:\n{{ JSON.stringify($json.company_input, null, 2) }}\n\nSearch snippets (top 10 results):\n{{ JSON.stringify($json.search_snippets, null, 2) }}\n\nYour task:\n- From company_input + snippets, extract the **top competitors** (company names, websites, LinkedIn if visible).\n- Return in STRICT JSON.\n- Do not add explanations or text outside JSON.\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an AI Competitive Intel Extractor.\nYou analyze a company's profile and Google search snippets to identify competitors.\n\nReturn STRICT JSON with this schema:\n\n{\n  \"competitors\": [\n    {\n      \"name\": string,\n      \"website\": string,\n      \"linkedin\": string\n    }\n  ]\n}",
+          "maxIterations": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        -1568
+      ],
+      "id": "db6229ca-b1ab-4587-8420-c226b2608f3a",
+      "name": "Competitor Finder AI"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1215a4db-c938-4ba4-b73a-d125301c5d8b",
+              "name": "result",
+              "value": "={{\n  (function () {\n    // 1) read AI output (string or object)\n    const raw = typeof $json.output === 'string'\n      ? JSON.parse($json.output)\n      : ($json.output || {});\n      \n    // 2) get the original company data from the Normalize Input node\n    const src = $node[\"Normalize Input\"].json || {};\n    const fallbackProfile = {\n      name: src.name || '',\n      industry: src.industry || '',\n      location: src.location || '',\n      website: src.website || '',\n      contact_email: src.email || ''\n    };\n\n    // 3) normalize\n    const company_profile = raw.company_profile || fallbackProfile;\n    const competitors = Array.isArray(raw.competitors) ? raw.competitors : [];\n\n    return { company_profile, competitors };\n  })()\n}}",
+              "type": "object"
+            },
+            {
+              "id": "f0ff2f14-4dbe-410e-876a-80a98d4e5c54",
+              "name": "company_key",
+              "value": "={{\n  (function () {\n    const raw = typeof $json.output === 'string'\n      ? JSON.parse($json.output)\n      : ($json.output || {});\n    const src = $node[\"Normalize Input\"].json || {};\n    const profile = raw.company_profile || {\n      name: src.name || '',\n      industry: src.industry || '',\n      location: src.location || '',\n      website: src.website || '',\n      contact_email: src.email || ''\n    };\n    return (profile.website || profile.name || '').trim();\n  })()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "ddcba034-0799-4d69-8db4-b1d0a7fc1037",
+              "name": "profile_json",
+              "value": "={{\n  (function () {\n    const raw = typeof $json.output === 'string'\n      ? JSON.parse($json.output)\n      : ($json.output || {});\n    const src = $node[\"Normalize Input\"].json || {};\n    const profile = raw.company_profile || {\n      name: src.name || '',\n      industry: src.industry || '',\n      location: src.location || '',\n      website: src.website || '',\n      contact_email: src.email || ''\n    };\n    return JSON.stringify(profile);\n  })()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "0061dfb6-6148-4395-949f-716bcc3b9c9f",
+              "name": "competitors_json",
+              "value": "={{\n  (function () {\n    const raw = typeof $json.output === 'string'\n      ? JSON.parse($json.output)\n      : ($json.output || {});\n    const competitors = Array.isArray(raw.competitors) ? raw.competitors : [];\n    return JSON.stringify(competitors);\n  })()\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1280,
+        -1568
+      ],
+      "id": "c5166624-af36-4252-adc4-6bd0d81835b1",
+      "name": "Format for Storage"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU",
+          "mode": "list",
+          "cachedResultName": "comp_spy_store",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ \"company::\" + $json.company_key }}",
+            "type": "=company_profile",
+            "payload_json": "={{ $json.profile_json }}",
+            "updated_at": "={{ new Date().toISOString() }}",
+            "contact_email": "={{ $json.result.company_profile.contact_email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload_json",
+              "displayName": "payload_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "contact_email",
+              "displayName": "contact_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        -1664
+      ],
+      "id": "bf8e0baf-6a96-452d-b138-0a3f12fa39e5",
+      "name": "Store Company Profile",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VcPSi2XemThigw4J",
+          "name": "Competitor Monitor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU",
+          "mode": "list",
+          "cachedResultName": "comp_spy_store",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ \"competitors::\" + $json.company_key }}",
+            "type": "=competitors",
+            "payload_json": "={{ $json.competitors_json }}",
+            "updated_at": "={{ new Date().toISOString() }}",
+            "contact_email": "={{ $json.result.company_profile.contact_email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload_json",
+              "displayName": "payload_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "contact_email",
+              "displayName": "contact_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1520,
+        -1456
+      ],
+      "id": "cd0016b4-5377-4825-9705-98612e1fd2df",
+      "name": "Store Competitor List",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VcPSi2XemThigw4J",
+          "name": "Competitor Monitor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        -1008
+      ],
+      "id": "0ca8acd0-478b-468d-8e61-46bfb62ee02d",
+      "name": "Daily Monitor Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU",
+          "mode": "list",
+          "cachedResultName": "comp_spy_store",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "type",
+              "lookupValue": "competitors"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        464,
+        -1008
+      ],
+      "id": "06075297-21f7-47e8-862b-4769cd1c923d",
+      "name": "Fetch Active Companies",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VcPSi2XemThigw4J",
+          "name": "Competitor Monitor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b28ac228-9870-4039-8374-54fde836bd5b",
+              "name": "company_key",
+              "value": "={{ $json.key.replace('competitors::','') }}",
+              "type": "string"
+            },
+            {
+              "id": "083dae02-b41a-4ffa-bf3e-7937cd312e17",
+              "name": "competitors",
+              "value": "={{ JSON.parse($json.payload_json) }}",
+              "type": "array"
+            },
+            {
+              "id": "b7887c11-b67c-485b-8ec2-09cc10eace91",
+              "name": "company_profile_key",
+              "value": "={{ 'company::' + $json.key.replace('competitors::','') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        672,
+        -1008
+      ],
+      "id": "893a7cc1-49cb-48e7-ba83-05a44dc278dc",
+      "name": "Extract Competitor URLs"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inputs\nconst companyKey = $json.company_key || '';\nconst companyProfileKey = $json.company_profile_key || '';\nconst competitors = $json.competitors || [];\n\n// Fallback paths if no watch_urls are provided\nconst FALLBACK_PATHS = ['pricing', 'plans', 'products', 'product', 'solutions', 'news', 'press', 'press-releases', 'blog'];\n\nfunction normBase(url) {\n  if (!url) return '';\n  return url.replace(/\\/+$/, ''); // trim trailing slash\n}\n\nfunction fallbackWatchUrls(site) {\n  const base = normBase(site);\n  if (!base) return [];\n  return FALLBACK_PATHS.map(p => `${base}/${p}`);\n}\n\nlet out = [];\n\nfor (const comp of competitors) {\n  // Prefer provided watch_urls; otherwise build from homepage\n  let urls = Array.isArray(comp.watch_urls) && comp.watch_urls.length\n    ? comp.watch_urls\n    : fallbackWatchUrls(comp.website);\n\n  // Ensure we have at least one URL (homepage) if all else fails\n  if (!urls.length && comp.website) urls = [normBase(comp.website)];\n\n  // Cap to 3 to keep things light\n  urls = urls.slice(0, 3);\n\n  for (const url of urls) {\n    out.push({\n      json: {\n        company_key: companyKey,\n        company_profile_key: companyProfileKey,\n        competitor_name: comp.name || '',\n        competitor_site: comp.website || '',\n        watch_url: url\n      }\n    });\n  }\n}\n\n// Safety: don't return zero items (downstream expressions may expect data)\nif (out.length === 0) {\n  // Either enable \"Settings → Always Output Data\", or emit a minimal row:\n  out.push({\n    json: {\n      company_key: companyKey,\n      company_profile_key: companyProfileKey,\n      note: 'no-competitor-urls-generated',\n      count: 0\n    }\n  });\n}\n\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -1008
+      ],
+      "id": "a761e3b5-819d-45ca-a6fe-05ae406ced1b",
+      "name": "Build URL Requests",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.watch_url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0(Windows NT 10.0; Win64; x64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en-US,en;q=0.9"
+            },
+            {
+              "name": "Cache-Control",
+              "value": "no-cache"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          },
+          "response": {
+            "response": {
+              "neverError": true,
+              "responseFormat": "text",
+              "outputPropertyName": "raw_page"
+            }
+          },
+          "timeout": 20000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1056,
+        -1008
+      ],
+      "id": "492a1dc3-899f-4f08-a9f8-6547ed0971e6",
+      "name": "Fetch Competitor Pages",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0a6c275c-5a0d-4288-b833-c93ab7ce7501",
+              "name": "company_key",
+              "value": "={{ $('Build URL Requests').item.json.company_key }}",
+              "type": "string"
+            },
+            {
+              "id": "cf7e3200-f1a5-4afa-9f44-acf3390f7f5a",
+              "name": "competitor_name",
+              "value": "={{ $('Build URL Requests').item.json.competitor_name }}",
+              "type": "string"
+            },
+            {
+              "id": "609f4d94-483a-40d3-a770-b50e99ff5182",
+              "name": "watch_url",
+              "value": "={{ $('Build URL Requests').item.json.watch_url }}",
+              "type": "string"
+            },
+            {
+              "id": "9df764df-201d-432b-af83-eccf30ab583f",
+              "name": "fetch_status",
+              "value": "={{   (() => {     const html = $json.raw_page || '';     if (!html) return 'empty';     return /browser-not-supported|enable javascript|403 forbidden|access denied/i.test(html)       ? 'blocked_or_js_heavy'       : 'ok';   })() }}",
+              "type": "string"
+            },
+            {
+              "id": "b500aee7-e34b-4800-96fb-423031df6e84",
+              "name": "page_text",
+              "value": "={{   (() => {     const html = $json.raw_page || '';     if (!html) return '';     if (/browser-not-supported|enable javascript|403 forbidden|access denied/i.test(html)) return '';     return html       .replace(/<script[\\s\\S]*?<\\/script>/gi,'')       .replace(/<style[\\s\\S]*?<\\/style>/gi,'')       .slice(0,3000);   })() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1248,
+        -1008
+      ],
+      "id": "f5aa8b7b-52b9-4ac8-8851-2b916e378d0a",
+      "name": "Parse Fetch Results"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        -1008
+      ],
+      "id": "ce91f1b5-e8ab-42d3-a597-6b7494b6128f",
+      "name": "Combine Pages Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "845f65a8-1f5c-4e9b-a363-76a14c5bfccc",
+              "name": "company_key",
+              "value": "={{ ($json.data?.[0]?.company_key) || $json.company_key || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "6540e783-4073-4ef5-8ade-f12df90ac7d8",
+              "name": "pages_ok",
+              "value": "={{ ($json.data || []).filter(i => i.fetch_status === 'ok' && i.page_text).map(i => ({ competitor: i.competitor_name || 'unknown', url: i.watch_url || '', text: (i.page_text || '').replace(/\\s+/g,' ').slice(0,1500) })) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        320,
+        -784
+      ],
+      "id": "a953fb5d-65ab-471d-8f9a-cb70ec851cb7",
+      "name": "Prepare AI Input"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=company_key: {{ $json.company_key }}\npages_ok: {{ JSON.stringify($json.pages_ok) }}\ntoday: {{ new Date().toISOString().slice(0,10) }}\n\nProduce STRICT JSON per schema.",
+        "options": {
+          "systemMessage": "You are an AI Competitive Intel Extractor.\n\nINPUT: JSON array pages_ok[] where each item is:\n{ competitor, url, text }. Work only from this text.\n\nGOAL: Extract concise, concrete signals, favoring:\n- Pricing/plan details or changes (currency, cadence).\n- New features, renamed product lines, major launches/press.\n- Route removals or 404s that indicate deprecations/moves.\n- Homepage/metadata cues (e.g., og:updated_time, taglines).\n\nIf a page is blocked/JS-only it won’t appear in pages_ok. Use what you have.\nIt’s acceptable to pull evidence from titles/meta tags or short phrases.\n\nRULES:\n- No speculation; base every signal on phrases/numbers present in text.\n- Use small quotes as evidence (no HTML blobs).\n- Max output 450 tokens.\n- If you still have no clear signals, return a brief “observations” entry and a minimal action plan.\n\nSTRICT JSON SCHEMA:\n{\n  \"company_key\": \"\",\n  \"date\": \"\",\n  \"findings\": [\n    {\n      \"competitor\": \"\",\n      \"url\": \"\",\n      \"signals\": [ \"short bullet\" ],\n      \"price_examples\": [\n        { \"plan\": \"\", \"price\": \"\", \"currency\": \"\", \"cadence\": \"\" }\n      ],\n      \"evidence\": \"one sentence with exact phrase/number\"\n    }\n  ],\n  \"observations\": [ \"optional generic but useful notes\" ],\n  \"action_plan\": [\n    \"≤3 concrete next steps (pricing test, email, ad tweak, landing page update).\"\n  ]\n}\nReturn ONLY JSON per schema."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -784
+      ],
+      "id": "137c0b51-9ff4-4ed3-8568-438967548022",
+      "name": "Signal Extraction AI"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "70818c5d-3f6f-4b3a-b84e-98cf4d4156dc",
+              "name": "company_key",
+              "value": "={{ $json.intel.company_key || '' }}",
+              "type": "string"
+            },
+            {
+              "id": "ee7a3e0f-1e9f-4d7d-bcf1-ce6d20e17b0c",
+              "name": "date",
+              "value": "={{ $json.intel.date || new Date().toISOString().slice(0,10) }}",
+              "type": "string"
+            },
+            {
+              "id": "f435d207-481d-40e3-bff9-5ff7d1551609",
+              "name": "report",
+              "value": "={{\n  (function() {\n    const i = $json.intel || {};\n    const lines = [];\n    lines.push(`## Final Competitor Report`);\n    lines.push(`Company: ${i.company_key || 'unknown'}`);\n    lines.push(`Date: ${i.date || new Date().toISOString().slice(0,10)}`);\n    lines.push('');\n    lines.push(`### Findings`);\n    (i.findings || []).forEach((f, idx) => {\n      lines.push(`- ${idx+1}. ${f.competitor || 'Unknown'} | ${f.url || ''}`);\n      if (Array.isArray(f.signals) && f.signals.length) {\n        lines.push(`  - Signals: ${f.signals.join('; ')}`);\n      }\n      if (Array.isArray(f.price_examples) && f.price_examples.length) {\n        lines.push(`  - Prices: ${f.price_examples.map(p => `${p.plan||''} ${p.currency||''}${p.price||''}`).join('; ')}`);\n      }\n      if (f.evidence) {\n        lines.push(`  - Evidence: ${f.evidence}`);\n      }\n    });\n    lines.push('');\n    if ((i.observations||[]).length) {\n      lines.push(`### Observations`);\n      (i.observations||[]).forEach(o => lines.push(`- ${o}`));\n      lines.push('');\n    }\n    if ((i.action_plan||[]).length) {\n      lines.push(`### Action plan`);\n      (i.action_plan||[]).forEach(a => lines.push(`- ${a}`));\n      lines.push('');\n    }\n    return lines.join('\\n');\n  })()\n}}",
+              "type": "string"
+            },
+            {
+              "id": "2ba1d0b0-e609-487c-b619-8b6ff2b50c58",
+              "name": "report_html",
+              "value": "={{\n  (function () {\n    const i = $json.intel || {};\n    const esc = s => (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n\n    // ---- 1) Deduplicate today's findings by URL (first occurrence wins)\n    const seen = new Set();\n    const dedup = [];\n    for (const f of (i.findings || [])) {\n      const url = (f.url || '').trim();\n      if (!url || seen.has(url)) continue;\n      seen.add(url);\n      dedup.push(f);\n    }\n\n    // ---- 2) Priority rules (very simple, in-run only)\n    const priority = (f) => {\n      const url = (f.url || '').toLowerCase();\n      if (/\\/pricing|\\/plans/.test(url)) return 'High';\n      if ((f.signals || []).length)       return 'Medium';\n      return 'Low';\n    };\n\n    // ---- 3) Optional NEW/SEEN: compare to previous hashes (if provided)\n    // If you can pass `$json.prev_hashes = ['amd|https://...','groq|https://...']`\n    // from any existing node, this will auto-label NEW/SEEN.\n    const prev = new Set(Array.isArray($json.prev_hashes) ? $json.prev_hashes : []);\n    const idFor = f => `${(f.competitor||'').toLowerCase()}|${(f.url||'').toLowerCase()}`;\n    const label = f => prev.size ? (prev.has(idFor(f)) ? 'SEEN' : 'NEW') : '';\n\n    const rows = dedup.map((f,idx)=>`\n      <tr>\n        <td style=\"padding:8px;border:1px solid #ddd\">${idx+1}</td>\n        <td style=\"padding:8px;border:1px solid #ddd\">\n          ${esc(f.competitor||'')}\n          ${label(f) ? `<span style=\"color:#fff;background:#6b46c1;border-radius:6px;padding:2px 6px;margin-left:6px;font-size:12px\">${label(f)}</span>` : ``}\n        </td>\n        <td style=\"padding:8px;border:1px solid #ddd\"><a href=\"${esc(f.url||'')}\" target=\"_blank\">${esc(f.url||'')}</a></td>\n        <td style=\"padding:8px;border:1px solid #ddd\">${esc((f.signals||[]).join('; '))}</td>\n        <td style=\"padding:8px;border:1px solid #ddd\">${esc((f.price_examples||[]).map(p => `${p.plan||''} ${p.currency||''}${p.price||''}`).join('; '))}</td>\n        <td style=\"padding:8px;border:1px solid #ddd\">${esc(f.evidence||'')}</td>\n        <td style=\"padding:8px;border:1px solid #ddd\">${priority(f)}</td>\n      </tr>\n    `).join('');\n\n    const list = arr => arr && arr.length\n      ? `<ul>${arr.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`\n      : '<em>None</em>';\n\n    return `\n      <div style=\"font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.4\">\n        <h2 style=\"margin:0 0 8px\">Competitor Report</h2>\n        <div style=\"color:#444;margin:0 0 16px\">\n          <div><strong>Company:</strong> ${esc(i.company_key||'')}</div>\n          <div><strong>Date:</strong> ${esc(i.date||new Date().toISOString().slice(0,10))}</div>\n        </div>\n\n        <h3 style=\"margin:16px 0 8px\">Findings</h3>\n        <table style=\"border-collapse:collapse;width:100%;font-size:14px\">\n          <thead>\n            <tr>\n              <th style=\"padding:8px;border:1px solid #ddd;text-align:left\">#</th>\n              <th style=\"padding:8px;border:1px solid #ddd;text-align:left\">Competitor</th>\n              <th style=\"padding:8px;border:1px solid #ddd;text-align:left\">URL</th>\n              <th style=\"padding:8px;border:1px solid #ddd;text-align:left\">Signals</th>\n              <th style=\"padding:8px;border:1px solid #ddd;text-align:left\">Prices</th>\n              <th style=\"padding:8px;border:1px solid #ddd;text-align:left\">Evidence</th>\n              <th style=\"padding:8px;border:1px solid #ddd;text-align:left\">Priority</th>\n            </tr>\n          </thead>\n          <tbody>\n            ${rows || `<tr><td colspan=\"7\" style=\"padding:8px;border:1px solid #ddd\"><em>No findings</em></td></tr>`}\n          </tbody>\n        </table>\n\n        <h3 style=\"margin:16px 0 8px\">Observations</h3>\n        ${list(i.observations||[])}\n\n        <h3 style=\"margin:16px 0 8px\">Action plan</h3>\n        ${list(i.action_plan||[])}\n      </div>\n    `;\n  })()\n}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        -784
+      ],
+      "id": "57920b50-5316-46fd-a7f3-7e7890ed96f0",
+      "name": "Format Signals Report"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU",
+          "mode": "list",
+          "cachedResultName": "comp_spy_store",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1W3XMte90OC4C9Dt4dFPN13AQOdDKIb6VdQh9j_-IFUU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "key": "={{ \"intel::\" + $json.intel.company_key + \"::\" + $json.intel.date }}",
+            "type": "intel",
+            "payload_json": "={{ JSON.stringify($json.intel) }}",
+            "updated_at": "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "payload_json",
+              "displayName": "payload_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1344,
+        -784
+      ],
+      "id": "c2ae522e-7468-4a30-92ce-f226e92cc7bb",
+      "name": "Store Signals Report",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "VcPSi2XemThigw4J",
+          "name": "Competitor Monitor"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Fetch Active Companies').item.json.contact_email }}",
+        "subject": "={{ `[Competitor Report] ${$json.company_key || 'Company'} — ${$json.date || new Date().toISOString().slice(0,10)}` }}",
+        "message": "={{ $json.report_html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1344,
+        -624
+      ],
+      "id": "1cd86138-9d35-4cca-aafa-1c246e92c4b6",
+      "name": "Email Report to User",
+      "webhookId": "b43c4e37-36a2-43e5-a75d-c745f286356d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "01Vf53wQj3umeiVT",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "q": "={{ [\n  $json.name,\n  'competitors',\n  $json.industry || '',\n  // optional: last token of location, e.g., \"California\" or \"USA\"\n  ($json.location || '').split(',').slice(-1)[0] || ''\n].filter(Boolean).join(' ') }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApi",
+      "typeVersion": 1,
+      "position": [
+        656,
+        -1568
+      ],
+      "id": "b4c5355b-4178-4215-a776-554efd74f834",
+      "name": "Google search",
+      "credentials": {
+        "serpApi": {
+          "id": "vg3hkg0ZJg2dxty0",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2d22b9d1-28a9-4e78-8277-612966505630",
+              "name": "intel",
+              "value": "={{   (function () {     const raw = typeof $json.output === 'string'       ? JSON.parse($json.output)       : ($json.output || {});     return {       company_key: raw.company_key || $json.company_key || '',       date: raw.date || new Date().toISOString().slice(0,10),       findings: Array.isArray(raw.findings) ? raw.findings : [],       observations: Array.isArray(raw.observations) ? raw.observations : [],       action_plan: Array.isArray(raw.action_plan) ? raw.action_plan : [],     };   })() }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        -784
+      ],
+      "id": "1ff6cdd2-7e3d-4f83-ac0b-a4d6e4ddad64",
+      "name": "Parse Signals JSON"
+    },
+    {
+      "parameters": {
+        "content": "## Onboarding (Competitor Discovery & Setup)\n\nDescription:\nThis workflow captures a new company input (from a form submission or manual entry), normalizes the data, and uses AI (Competitor Finder) + SerpAPI to discover relevant competitors. The output is formatted for storage and saved into Google Sheets:\n\nCompany Profile Sheet → stores the company being monitored (name, industry, website, contact).\n\nCompetitor List Sheet → stores discovered competitors with their metadata (website, LinkedIn, etc.).\n\n💡 This creates the foundation dataset of companies and competitors that the second workflow can monitor.",
+        "height": 480,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -1696
+      ],
+      "id": "3785464a-79ae-414c-9e07-ed9c0cb44b76",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Monitoring (Competitor Signals Monitoring)\n\nDescription:\nThis workflow runs on a schedule (e.g., daily) to fetch competitor websites and extract intelligence signals.\n\nFetches active companies and their competitors from the Sheets.\n\nBuilds and executes HTTP requests to competitor “watch URLs” (pricing, products, technology pages).\n\nParses the responses to capture meaningful text, status, and signals.\n\nAggregates and formats the results into a structured competitor intelligence report.\n\nSaves the report in Google Sheets and sends a polished HTML email to the user with Findings, Observations, Action Plan, and Priority levels.\n\n💡 This workflow acts like an automated competitor monitoring assistant, delivering daily CI updates straight to your inbox.",
+        "height": 672,
+        "width": 544
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        -1136
+      ],
+      "id": "42858947-3d7e-41c2-a636-d51c3564799e",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4cb1773c-14be-405e-bc80-60142fa0089c",
+              "name": "company_input",
+              "value": "={{\n  {\n    name: $node[\"Normalize Input\"].json.name,\n    industry: $node[\"Normalize Input\"].json.industry,\n    location: $node[\"Normalize Input\"].json.location,\n    website: $node[\"Normalize Input\"].json.website,\n    contact_email: $node[\"Normalize Input\"].json.email\n  }\n}}",
+              "type": "object"
+            },
+            {
+              "id": "76b95530-8437-4318-a7be-877232a81f2c",
+              "name": "search_snippets",
+              "value": "={{ \n  ($json.organic_results || [])\n    .slice(0,10)\n    .map(r => ({ title: r.title, link: r.link, snippet: r.snippet }))\n}}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        816,
+        -1568
+      ],
+      "id": "a461b4fe-f2e5-42aa-90d0-3fd94e06d1d2",
+      "name": "Compact Snippets"
+    }
+  ],
+  "pinData": {
+    "Capture Company Input": [
+      {
+        "json": {
+          "Company Name": "Nvidia",
+          "Industry": "semiconductor industry",
+          "Location": "2788 San Tomas Expressway, Santa Clara, California",
+          "Website": "https://www.nvidia.com/en-us/",
+          "Email": "farazabro309@gmail.com",
+          "submittedAt": "2025-09-17T04:17:58.360-04:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Competitor Finder AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Signal Extraction AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Capture Company Input": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Google search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Competitor Finder AI": {
+      "main": [
+        [
+          {
+            "node": "Format for Storage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format for Storage": {
+      "main": [
+        [
+          {
+            "node": "Store Company Profile",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Store Competitor List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Company Profile": {
+      "main": [
+        []
+      ]
+    },
+    "Daily Monitor Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Active Companies",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Active Companies": {
+      "main": [
+        [
+          {
+            "node": "Extract Competitor URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Competitor URLs": {
+      "main": [
+        [
+          {
+            "node": "Build URL Requests",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build URL Requests": {
+      "main": [
+        [
+          {
+            "node": "Fetch Competitor Pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Competitor Pages": {
+      "main": [
+        [
+          {
+            "node": "Parse Fetch Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Fetch Results": {
+      "main": [
+        [
+          {
+            "node": "Combine Pages Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Pages Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Input": {
+      "main": [
+        [
+          {
+            "node": "Signal Extraction AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signal Extraction AI": {
+      "main": [
+        [
+          {
+            "node": "Parse Signals JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Signals Report": {
+      "main": [
+        [
+          {
+            "node": "Store Signals Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email Report to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store Signals Report": {
+      "main": [
+        []
+      ]
+    },
+    "Google search": {
+      "main": [
+        [
+          {
+            "node": "Compact Snippets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Signals JSON": {
+      "main": [
+        [
+          {
+            "node": "Format Signals Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compact Snippets": {
+      "main": [
+        [
+          {
+            "node": "Competitor Finder AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "6158b70a-f93b-44db-8f89-396f17ad7ef1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "beac1953369b02f4ae3cb2c51c60614da2bd5444b5edcd3d4480d32a619f9fd5"
+  },
+  "id": "UrRMJHK6SzYsBcCb",
+  "tags": []
+}

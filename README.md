@@ -56,6 +56,8 @@ Live Demo (self-hosted n8n): https://n8n.smartaichronicle.com
 
 Presentation Slides: See Competitor Monitoring Agent.pdf
 
+Video Link: https://www.loom.com/share/0c0971e713c14eb5bf6dd0a10eb289b4?sid=fcb06242-8e5b-40b9-840e-070f1c3aa1d0
+
 📖 How to Run Locally
 
 Clone the repo:

@@ -56,13 +56,11 @@ Live Demo (self-hosted n8n): https://n8n.smartaichronicle.com
 
 Presentation Slides: See Competitor Monitoring Agent.pdf
 
-Video Demo (2 min): [Link to uploaded demo video here]
-
 📖 How to Run Locally
 
 Clone the repo:
 
-git clone https://github.com/faraz55/competitor-monitoring-agent.git
+git clone (https://github.com/farazz55/competitor-monitoring-agent)
 
 cd competitor-monitoring-agent
 
